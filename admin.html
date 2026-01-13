@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin | Gestión de Tienda</title>
+    <style>
+        body { background-color: #0f172a; font-family: sans-serif; color: white; display: flex; gap: 20px; padding: 20px; }
+        .form-container { background: #1e293b; padding: 20px; border-radius: 15px; width: 400px; height: fit-content; }
+        .list-container { background: #1e293b; padding: 20px; border-radius: 15px; flex-grow: 1; }
+        input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { background: #00d2ff; color: #0f172a; font-weight: bold; cursor: pointer; }
+        button:hover { background: #3a7bd5; color: white; }
+        .prod-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding: 10px 0; }
+        .btn-del { background: #ef4444; width: auto; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Añadir Producto</h2>
+        <form id="form-nuevo-producto">
+            <input type="text" id="nombre" placeholder="Nombre" required>
+            <input type="number" id="precio" placeholder="Precio" step="0.01" required>
+            <select id="categoria">
+                <option value="Laptops">Laptops</option>
+                <option value="Componentes">Componentes</option>
+                <option value="Accesorios">Accesorios</option>
+            </select>
+            <input type="text" id="specs" placeholder="Especificaciones">
+            <input type="text" id="imagen" placeholder="URL de la imagen">
+            <button type="submit">Guardar en Base de Datos</button>
+        </form>
+        <a href="index.html" style="color: #94a3b8; text-decoration: none;">← Volver</a>
+    </div>
+
+    <div class="list-container">
+        <h2>Productos en DB</h2>
+        <div id="lista-gestion"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000/api/productos';
+
+        // 1. FUNCIÓN PARA CARGAR LA LISTA
+        async function cargarLista() {
+            try {
+                const res = await fetch(API_URL);
+                const productos = await res.json();
+                const div = document.getElementById('lista-gestion');
+                div.innerHTML = productos.map(p => `
+                    <div class="prod-item">
+                        <span>${p.name} - $${p.price}</span>
+                        <button class="btn-del" onclick="eliminarProducto(${p.id})">Borrar</button>
+                    </div>
+                `).join('');
+            } catch (e) { console.error("Error cargando lista", e); }
+        }
+
+        // 2. FUNCIÓN PARA GUARDAR (El botón que no hacía nada)
+        document.getElementById('form-nuevo-producto').onsubmit = async (e) => {
+            e.preventDefault(); // Evita que la página se recargue
+            
+            const nuevoProd = {
+                name: document.getElementById('nombre').value,
+                price: parseFloat(document.getElementById('precio').value),
+                category: document.getElementById('categoria').value,
+                specs: document.getElementById('specs').value,
+                img: document.getElementById('imagen').value || 'https://via.placeholder.com/300'
+            };
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoProd)
+                });
+
+                if (res.ok) {
+                    alert("¡Producto guardado!");
+                    e.target.reset(); // Limpia el formulario
+                    cargarLista();    // Actualiza la lista de la derecha
+                }
+            } catch (err) { alert("Error: Asegúrate de que Python esté corriendo"); }
+        };
+
+        // 3. FUNCIÓN PARA ELIMINAR
+        async function eliminarProducto(id) {
+            if (!confirm("¿Borrar producto?")) return;
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            cargarLista();
+        }
+
+        // Iniciar lista al abrir
+        window.onload = cargarLista;
+    </script>
+</body>
+</html>
