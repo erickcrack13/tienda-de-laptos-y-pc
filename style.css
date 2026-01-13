@@ -546,3 +546,27 @@ body {
     color: var(--primary); /* Esto lo hará resaltar en el azul de tu marca */
     margin: 10px 0;
 }
+/* Ajustes para pantallas pequeñas (Móviles) */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.2rem; /* Reduce un poco el tamaño del título */
+        line-height: 1.2;
+        padding: 0 10px;
+    }
+
+    .search-container {
+        flex-direction: column; /* Pone el botón debajo del input si no hay espacio */
+        width: 90%;
+        margin: 0 auto;
+    }
+
+    .search-btn {
+        width: 100%; /* El botón ocupa todo el ancho en móvil */
+        margin-top: 10px;
+    }
+
+    .features {
+        grid-template-columns: 1fr; /* Los beneficios se apilan uno sobre otro */
+        padding: 20px;
+    }
+}
